@@ -1,0 +1,25 @@
+FROM openjdk:19-jdk-slim AS build
+
+WORKDIR /identity
+
+COPY mvnw pom.xml /identity/
+COPY .mvn /identity/.mvn
+
+RUN chmod +x /identity/mvnw
+
+RUN ./mvnw dependency:go-offline -B
+
+COPY src /identity/src
+
+RUN ./mvnw clean package -DskipTests
+
+FROM openjdk:19-jdk-slim
+
+WORKDIR /identity
+
+# COPY --from=build /identity/target/identity-0.0.1-SNAPSHOT.jar /identity/baby-monitor.jar
+
+# This command sends the Docker Desktop container to use the local .jar file and not the one used to build the image
+# doing this allows you to use local files instead of the ones running in container, enabling hot reloading.
+
+CMD ["java", "-jar", "target/identity-0.0.1-SNAPSHOT.jar"]

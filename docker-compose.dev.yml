@@ -1,0 +1,12 @@
+services:
+  identity:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/identity
+      - ~/.m2:/root/.m2  # Cache Maven dependencies
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
