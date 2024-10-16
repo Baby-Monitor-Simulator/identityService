@@ -3,10 +3,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    ports:
-      - "8081:8091"
     volumes:
-      - .:/identity
-      - ~/.m2:/root/.m2  # Cache Maven dependencies
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
+      - ./src:/identity/src           # Mount the local src directory
+      - ./target:/identity/target       # Mount the local target directory
+      - ./mvnw:/identity/mvnw           # Mount the mvnw script
+      - ./pom.xml:/identity/pom.xml     # Mount the pom.xml if needed
+    ports:
+      - "8091:8091"                     # Map port 8091 to the host

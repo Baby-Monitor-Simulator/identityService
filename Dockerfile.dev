@@ -1,25 +1,20 @@
-FROM openjdk:19-jdk-slim AS build
+FROM openjdk:17-jdk-slim
 
 WORKDIR /identity
 
-COPY mvnw pom.xml /identity/
-COPY .mvn /identity/.mvn
+# Copy Maven Wrapper and pom.xml
+COPY mvnw pom.xml ./
+COPY .mvn .mvn
 
-RUN chmod +x /identity/mvnw
+# Copy source files
+COPY src ./src
 
-RUN ./mvnw dependency:go-offline -B
+# Ensure the mvnw script is executable
+RUN chmod +x mvnw
 
-COPY src /identity/src
+# Copy the entrypoint script
+COPY entrypoint.sh /identity/entrypoint.sh
+RUN chmod +x /identity/entrypoint.sh
 
-RUN ./mvnw clean package -DskipTests
-
-FROM openjdk:19-jdk-slim
-
-WORKDIR /identity
-
-# COPY --from=build /identity/target/identity-0.0.1-SNAPSHOT.jar /identity/baby-monitor.jar
-
-# This command sends the Docker Desktop container to use the local .jar file and not the one used to build the image
-# doing this allows you to use local files instead of the ones running in container, enabling hot reloading.
-
-CMD ["java", "-jar", "target/identity-0.0.1-SNAPSHOT.jar"]
+# Set the entrypoint
+ENTRYPOINT ["./entrypoint.sh"]

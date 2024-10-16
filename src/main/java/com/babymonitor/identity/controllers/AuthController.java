@@ -20,6 +20,6 @@ public class AuthController {
 
     @GetMapping("/ping")
     public ResponseEntity<String> ping() {
-        return ResponseEntity.ok("The identity service is live");
+                return ResponseEntity.ok("The identity server is up and running.");
     }
 }
