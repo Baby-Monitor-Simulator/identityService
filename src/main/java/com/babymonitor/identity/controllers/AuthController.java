@@ -5,10 +5,7 @@ import com.babymonitor.identity.models.User;
 
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/identity")
@@ -19,5 +16,10 @@ public class AuthController {
 
         User user = new User(loginRequest.getUsername(), loginRequest.getPassword());
         return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/ping")
+    public ResponseEntity<String> ping() {
+        return ResponseEntity.ok("The identity service is live");
     }
 }
