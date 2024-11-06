@@ -3,7 +3,7 @@ package com.babymonitor.identity.controllers;
 import com.babymonitor.identity.models.LoginRequest;
 import com.babymonitor.identity.models.User;
 import com.babymonitor.identity.models.UserDTO;
-import com.babymonitor.identity.services.JwtTokenProvider;
+import com.babymonitor.identity.services.JwtAuthConverter;
 import com.babymonitor.identity.services.UserCreation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,11 +21,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/identity")
 public class AuthController {
 
-    @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<User> authenticateUser(@RequestBody LoginRequest loginRequest) {
+
 
     @Autowired
-    private JwtTokenProvider tokenProvider;
+    private JwtAuthConverter tokenProvider;
 
     private final UserCreation userCreation;
 
