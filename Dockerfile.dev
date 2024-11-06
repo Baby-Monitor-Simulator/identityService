@@ -1,0 +1,20 @@
+FROM openjdk:17-jdk-slim
+
+WORKDIR /identity
+
+# Copy Maven Wrapper and pom.xml
+COPY mvnw pom.xml ./
+COPY .mvn .mvn
+
+# Copy source files
+COPY src ./src
+
+# Ensure the mvnw script is executable
+RUN chmod +x mvnw
+
+# Copy the entrypoint script
+COPY entrypoint.sh /identity/entrypoint.sh
+RUN chmod +x /identity/entrypoint.sh
+
+# Set the entrypoint
+ENTRYPOINT ["./entrypoint.sh"]
