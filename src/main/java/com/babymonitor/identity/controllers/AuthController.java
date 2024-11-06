@@ -21,7 +21,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/identity")
 public class AuthController {
 
-
+    @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<User> authenticateUser(@RequestBody LoginRequest loginRequest) {
 
     @Autowired
     private JwtTokenProvider tokenProvider;
