@@ -41,18 +41,6 @@ public class AuthController {
        return new ResponseEntity<>(user, HttpStatusCode.valueOf(200));
     }
 
-    @GetMapping("/hello-1")
-    @PreAuthorize("hasRole('client_instructeur')")
-    public String hello() {
-        return "Hello from Spring boot & Keycloak";
-    }
-
-    @GetMapping("/hello-2")
-    @PreAuthorize("hasRole('client_admin')")
-    public String hello2() {
-        return "Hello from Sping boot & Keycloak ADMIN";
-    }
-
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody UserDTO userDTO) {
         String userId = userCreation.createUser(userDTO.getUsername(), userDTO.getEmail(), userDTO.getPassword());

@@ -16,24 +16,30 @@ import java.util.Collections;
 @Service
 public class UserCreation {
 
-    @Value("${keycloak.auth-server-url}")
-    private String authServerUrl;  // Zorg ervoor dat deze waarde in je properties-bestand staat
+    @Value("${KEYCLOAK_AUTH_SERVER_URL}")
+    private String authServerUrl;
 
-    @Value("${keycloak.realm}")
-    private String realm;  // Het realm waar je de gebruiker aan wilt toevoegen
+    @Value("${KEYCLOAK_REALM}")
+    private String realm;
 
-    @Value("${keycloak.client-id}")
-    private String clientId;  // Je Keycloak client ID
+    @Value("${KEYCLOAK_CLIENT_ID}")
+    private String clientId;
+
+    @Value("${KEYCLOAK_USER_ADMIN}")
+    private String userAdmin;
+
+    @Value("${KEYCLOAK_USER_PASSWORD}")
+    private String userPassword;
 
 
 
     private Keycloak getKeycloakClient() {
         return KeycloakBuilder.builder()
                 .serverUrl(authServerUrl)
-                .realm("TaskService")
+                .realm(realm)
                 .clientId(clientId)
-                .username("hassan")
-                .password("hassan")
+                .username(userAdmin)
+                .password(userPassword)
                 .grantType(OAuth2Constants.PASSWORD)
                 .build();
     }
