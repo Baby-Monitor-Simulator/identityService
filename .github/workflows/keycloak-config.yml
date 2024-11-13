@@ -3,52 +3,42 @@ name: Export Keycloak Data and Push to GitHub
 on:
   push:
     branches:
-      - registreren  # Trigger de workflow bij push naar registreren
+      - registreren  
 
 jobs:
   export_keycloak_data:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
 
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
 
-      - name: Start Keycloak container
-        run: |
-          docker run -d --name keycloak-container \
-            -e KEYCLOAK_ADMIN="myadmin"  \
-            -e KEYCLOAK_ADMIN_PASSWORD="myadminpassword" \
-            quay.io/keycloak/keycloak:23.0.6 \
-            start --optimized --hostname localhost
-
-      - name: Wait for Keycloak to initialize
-        run: sleep 30  # Wacht een tijdje zodat Keycloak kan opstarten
-
       - name: Create export directory
         run: mkdir -p keycloak-export
 
+      - name: Run Keycloak export command
+        run: |
+          CONTAINER_ID="identityservice-keycloak-1"  # Vervang dit door je eigen containernaam
+          docker exec $CONTAINER_ID /opt/keycloak/bin/kc.sh export --dir=/opt/keycloak/data/export
+
       - name: Copy Keycloak export data from container
         run: |
-          docker cp keycloak-container:/opt/keycloak/data/export ./keycloak-export
-
-      - name: Stop and remove Keycloak container
-        run: |
-          docker stop keycloak-container
-          docker rm keycloak-container
+          CONTAINER_ID="identityservice-keycloak-1"  # Vervang dit door je eigen containernaam
+          docker cp $CONTAINER_ID:/opt/keycloak/data/export/Babymonitor-realm.json ./keycloak-export/Babymonitor-realm.json
 
       - name: Commit exported Keycloak data
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions Keycloak"
-          git add keycloak-export/
-          git commit -m "Update Keycloak data export" || echo "No changes to commit"
-          git push origin registreren
+          git add keycloak-export/  # Voeg de export map toe
+          git commit -m "Update Keycloak data export" || echo "No changes to commit"  # Commit het bestand
+          git push origin registreren  # Push naar de registreren branch
 
       - name: Upload exported data as artifact
         uses: actions/upload-artifact@v3
         with:
           name: keycloak-export
-          path: ./keycloak-export
+          path: ./keycloak-export  # Upload de export als een artifact voor later gebruik
