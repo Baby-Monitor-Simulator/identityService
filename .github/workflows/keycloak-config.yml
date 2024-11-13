@@ -24,7 +24,7 @@ jobs:
           docker run --rm \
             -v "$(pwd)/keycloak-export:/opt/keycloak/data/export" \
             quay.io/keycloak/keycloak:23.0.6 \
-            /opt/keycloak/bin/kc.sh export --dir /opt/keycloak/data/export --users realm_file
+            start --export /opt/keycloak/data/export --users realm_file
 
       - name: Commit exported Keycloak data
         run: |
