@@ -1,0 +1,39 @@
+name: Export Keycloak Data and Push to GitHub
+
+on:
+  push:
+    branches:
+      - registreren  # Trigger de workflow bij push naar main
+
+jobs:
+  export_keycloak_data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Run Keycloak Export
+        run: |
+          docker run --rm \
+            -v keycloak_data:/opt/keycloak/data \
+            quay.io/keycloak/keycloak:23.0.6 \
+            /opt/keycloak/bin/kc.sh export --dir /opt/keycloak/data/export --users realm_file
+          cp -r /opt/keycloak/data/export ./keycloak-export
+
+      - name: Commit exported Keycloak data
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions Keycloak"
+          git add keycloak-export/
+          git commit -m "Update Keycloak data export"
+          git push origin registreren
+
+      - name: Upload exported data as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: keycloak-export
+          path: ./keycloak-export
