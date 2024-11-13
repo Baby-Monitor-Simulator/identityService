@@ -37,10 +37,9 @@ services:
       - keycloak_network
 
 volumes:
-  postgres_data:
-    driver: local
-  keycloak_data:
-    driver: local
+  postgres_data: {}
+  keycloak_data: {}
+
 
 networks:
   keycloak_network:

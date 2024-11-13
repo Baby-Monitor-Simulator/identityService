@@ -60,7 +60,7 @@ public class KeycloakService {
     private String extractBearerToken(HttpServletRequest request) {
         String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            return authorizationHeader.substring(7); // Haal de token na "Bearer " op
+            return authorizationHeader.substring(7);
         }
         return null;
     }

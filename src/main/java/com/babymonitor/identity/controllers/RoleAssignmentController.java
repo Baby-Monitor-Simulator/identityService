@@ -29,7 +29,7 @@ public class RoleAssignmentController {
             HttpServletRequest request) {
         try {
             String response = keycloakService.assignRoleToUser(username, role, request);
-            return ResponseEntity.ok(response);  // Succesvolle reactie
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Fout bij het toewijzen van de rol, alleen Admins mogen rollen toewijzen: " + e.getMessage());
         }
