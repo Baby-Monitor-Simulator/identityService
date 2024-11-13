@@ -19,15 +19,17 @@ jobs:
       - name: Create export directory
         run: mkdir -p keycloak-export
 
+      - name: Start Keycloak container
+        run: |
+          docker-compose -f docker-compose.yml up -d keycloak  # Start de Keycloak container met Docker Compose
+
       - name: Run Keycloak export command
         run: |
-          CONTAINER_ID="identityservice-keycloak-1"  # Vervang dit door je eigen containernaam
-          docker exec $CONTAINER_ID /opt/keycloak/bin/kc.sh export --dir=/opt/keycloak/data/export
+          docker exec -T keycloak-1 /opt/keycloak/bin/kc.sh export --dir=/opt/keycloak/data/export
 
       - name: Copy Keycloak export data from container
         run: |
-          CONTAINER_ID="identityservice-keycloak-1"  # Vervang dit door je eigen containernaam
-          docker cp $CONTAINER_ID:/opt/keycloak/data/export/Babymonitor-realm.json ./keycloak-export/Babymonitor-realm.json
+          docker cp keycloak-1:/opt/keycloak/data/export/Babymonitor-realm.json ./keycloak-export/Babymonitor-realm.json
 
       - name: Commit exported Keycloak data
         run: |
@@ -36,6 +38,10 @@ jobs:
           git add keycloak-export/  # Voeg de export map toe
           git commit -m "Update Keycloak data export" || echo "No changes to commit"  # Commit het bestand
           git push origin registreren  # Push naar de registreren branch
+
+      - name: Stop Keycloak container
+        run: |
+          docker-compose -f docker-compose.yml down  # Stop de container na export
 
       - name: Upload exported data as artifact
         uses: actions/upload-artifact@v3
