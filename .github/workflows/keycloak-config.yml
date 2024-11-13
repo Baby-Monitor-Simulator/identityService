@@ -24,8 +24,11 @@ jobs:
           docker run --rm \
             -e KEYCLOAK_ADMIN=admin \
             -e KEYCLOAK_ADMIN_PASSWORD=admin \
+            -e KEYCLOAK_HOSTNAME=localhost \
+            -v /path/to/local/directory:/opt/keycloak/data/export \
             quay.io/keycloak/keycloak:23.0.6 \
-            start --spi-export-provider=dir --spi-export-dir=/opt/keycloak/data/export --spi-export-users=realm_file
+            start --optimized --spi-export-provider=dir --spi-export-dir=/opt/keycloak/data/export --spi-export-users=realm_file
+  
   
   
   
