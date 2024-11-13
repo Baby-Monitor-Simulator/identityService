@@ -16,20 +16,22 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
 
+      - name: Create export directory
+        run: mkdir -p keycloak-export
+
       - name: Run Keycloak Export
         run: |
           docker run --rm \
-            -v keycloak_data:/opt/keycloak/data \
+            -v "$(pwd)/keycloak-export:/opt/keycloak/data/export" \
             quay.io/keycloak/keycloak:23.0.6 \
             /opt/keycloak/bin/kc.sh export --dir /opt/keycloak/data/export --users realm_file
-          cp -r /opt/keycloak/data/export ./keycloak-export
 
       - name: Commit exported Keycloak data
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions Keycloak"
           git add keycloak-export/
-          git commit -m "Update Keycloak data export"
+          git commit -m "Update Keycloak data export" || echo "No changes to commit"
           git push origin registreren
 
       - name: Upload exported data as artifact
