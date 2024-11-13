@@ -24,11 +24,13 @@ jobs:
           docker run --rm \
             -e KEYCLOAK_ADMIN=admin \
             -e KEYCLOAK_ADMIN_PASSWORD=admin \
+            -v $(pwd)/keycloak-export:/opt/keycloak/data/export \
             quay.io/keycloak/keycloak:23.0.6 \
-            start --dev --spi-export-provider=dir --spi-export-dir=/opt/keycloak/data/export --spi-export-users=realm_file
+            start-dev --spi-export-provider=dir --spi-export-dir=/opt/keycloak/data/export --spi-export-users=realm_file
+  
   
 
-      - name: Commit exported Keycloak data
+  - name: Commit exported Keycloak data
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions Keycloak"
