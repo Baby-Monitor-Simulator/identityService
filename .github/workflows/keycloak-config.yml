@@ -13,19 +13,33 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Start Keycloak container
+        run: |
+          docker run -d --name keycloak-container \
+            -e KEYCLOAK_ADMIN="myadmin"  \
+            -e KEYCLOAK_ADMIN_PASSWORD="myadminpassword" \
+            quay.io/keycloak/keycloak:23.0.6 \
+            start --optimized --hostname localhost
+
+      - name: Wait for Keycloak to initialize
+        run: sleep 30  # Wacht een tijdje zodat Keycloak kan opstarten
+
       - name: Create export directory
         run: mkdir -p keycloak-export
 
-      - name: Copy Keycloak export data from existing container
+      - name: Copy Keycloak export data from container
         run: |
-          CONTAINER_ID=$(docker ps -q --filter "ancestor=quay.io/keycloak/keycloak:23.0.6")
-          if [ -z "$CONTAINER_ID" ]; then
-            echo "No running Keycloak container found. Exiting."
-            exit 1
-          fi
-          docker cp "identityservice-keycloak-1":/opt/keycloak/data/export ./keycloak-export
+          docker cp keycloak-container:/opt/keycloak/data/export ./keycloak-export
 
-      - name: Commit exported Keycloak dataa
+      - name: Stop and remove Keycloak container
+        run: |
+          docker stop keycloak-container
+          docker rm keycloak-container
+
+      - name: Commit exported Keycloak data
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions Keycloak"
