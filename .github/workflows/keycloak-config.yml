@@ -3,7 +3,7 @@ name: Export Keycloak Data and Push to GitHub
 on:
   push:
     branches:
-      - registreren  # Trigger de workflow bij push naar main
+      - registreren  # Trigger de workflow bij push naar registreren
 
 jobs:
   export_keycloak_data:
@@ -21,7 +21,7 @@ jobs:
           docker run --rm \
             -v keycloak_data:/opt/keycloak/data \
             quay.io/keycloak/keycloak:23.0.6 \
-            kc export --dir /opt/keycloak/data/export --users realm_file
+            /opt/keycloak/bin/kc.sh export --dir /opt/keycloak/data/export --users realm_file
           cp -r /opt/keycloak/data/export ./keycloak-export
 
       - name: Commit exported Keycloak data
