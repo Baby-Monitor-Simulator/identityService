@@ -22,15 +22,10 @@ jobs:
       - name: Run Keycloak Export
         run: |
           docker run --rm \
-            -e KEYCLOAK_ADMIN=admin \
-            -e KEYCLOAK_ADMIN_PASSWORD=admin \
+            -e KEYCLOAK_ADMIN=myadmin \
+            -e KEYCLOAK_ADMIN_PASSWORD=myadminpassword \
             quay.io/keycloak/keycloak:23.0.6 \
             start --optimized --hostname localhost --spi-export-provider=dir --spi-export-dir=/opt/keycloak/data/export --spi-export-users=realm_file
-            
-  
-  
-  
-  
 
       - name: Commit exported Keycloak data
         run: |
