@@ -33,7 +33,7 @@ jobs:
           git push origin registreren
 
       - name: Upload exported data as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: keycloak-export
           path: ./keycloak-export
