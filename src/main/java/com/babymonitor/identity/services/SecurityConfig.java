@@ -19,16 +19,13 @@ public class SecurityConfig {
 
     private final JwtAuthConverter jwtAuthConverter;
 
-
-
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception  {
         http
                 .csrf()
                     .disable()
                 .authorizeHttpRequests()
-                    .requestMatchers("/identity/register")  // Specifieke endpoint toestaan
+                    .requestMatchers("/identity/register", "/identity/login")  // Specifieke endpoint toestaan
                         .permitAll()
                     .anyRequest()
                         .authenticated();
