@@ -12,10 +12,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -54,23 +51,40 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
     };
 
     private Collection<? extends GrantedAuthority> extractResourceRoles(Jwt jwt) {
-        Map<String, Object> resourceAccess;
-        Map<String, Object> resource;
-        Collection<String> resourceRoles;
-        if(jwt.getClaim("resource_access") == null){
-            return Set.of();
-        }
-        resourceAccess = jwt.getClaim("resource_access");
+        // Eerste stap: Verkrijg rollen uit de 'resource_access' claim (al geïmplementeerd)
+        Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
 
-        if(resourceAccess.get(resourceId) == null){
-            return Set.of();
-        }
-        resource = (Map<String, Object>) resourceAccess.get(resourceId);
+        // Verkrijg de rollen voor de resource 'realm-management' (deze resource kan variëren, pas het aan als nodig)
+        Set<GrantedAuthority> authorities = new HashSet<>();
 
-        resourceRoles = (Collection<String>) resource.get("roles");
-        return resourceRoles
-                .stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                .collect(Collectors.toSet());
+        // Verkrijg de rollen uit 'realm_access' (deze claim bevat de standaard rollen zoals 'admin')
+        if (jwt.getClaim("realm_access") != null) {
+            Map<String, Object> realmAccess = jwt.getClaim("realm_access");
+
+            // Verkrijg de rollen van 'realm_access' en map ze naar GrantedAuthority
+            if (realmAccess.containsKey("roles")) {
+                Collection<String> realmRoles = (Collection<String>) realmAccess.get("roles");
+                authorities.addAll(realmRoles.stream()
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role)) // Voeg de rol toe als "ROLE_<rolnaam>"
+                        .collect(Collectors.toSet()));
+            }
+        }
+
+        // Verkrijg de rollen uit de 'resource_access' claim zoals je eerder deed
+        if (resourceAccess != null) {
+            resourceAccess.forEach((key, value) -> {
+                if (value instanceof Map) {
+                    Map<String, Object> resource = (Map<String, Object>) value;
+                    if (resource.containsKey("roles")) {
+                        Collection<String> resourceRoles = (Collection<String>) resource.get("roles");
+                        authorities.addAll(resourceRoles.stream()
+                                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                                .collect(Collectors.toSet()));
+                    }
+                }
+            });
+        }
+
+        return authorities;
     }
 }

@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -21,12 +23,17 @@ public class RoleAssignmentController {
     }
 
 
+
+
     @PostMapping("/{username}/roles/{role}")
-    @PreAuthorize("hasRole('realm-admin')")
+    @PreAuthorize("hasRole('admin')")
     public ResponseEntity<String> assignRole(
             @PathVariable String username,
             @PathVariable String role,
             HttpServletRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("Authorities: " + authentication.getAuthorities());
+        // Probeer daarna de oorspronkelijke logica:
         try {
             String response = keycloakService.assignRoleToUser(username, role, request);
             return ResponseEntity.ok(response);
