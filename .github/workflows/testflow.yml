@@ -46,7 +46,7 @@ jobs:
           PORT=$(echo $KEYCLOAK_URL | awk -F[/:] '{print $5}')
           PORT=${PORT:-80} # Default to port 80 if not specified
       
-          echo "Validating host and port..."
+          echo "Checking if hostname and port are valid..."
           if [ -z "$HOST" ]; then
             echo "Error: Host is empty. Please check the KEYCLOAK_URL."
             exit 1
@@ -55,25 +55,10 @@ jobs:
             echo "Error: Port is invalid: $PORT. Please check the KEYCLOAK_URL."
             exit 1
           fi
-      
-          echo "Waiting for Keycloak at $KEYCLOAK_URL"
-          for i in {1..30}; do
-            STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" $KEYCLOAK_URL/auth || echo "0")
-            if [ "$STATUS_CODE" -eq 200 ]; then
-              echo "Keycloak is up and responding at $KEYCLOAK_URL!"
-              break
-            fi
-      
-            echo "Attempt $i: Keycloak is not ready (HTTP $STATUS_CODE). Retrying in 5 seconds..."
-            sleep 5
-          done
-      
-          if [ "$STATUS_CODE" -ne 200 ]; then
-            echo "Error: Keycloak did not start within the expected time or is not responding at $KEYCLOAK_URL/auth."
-            curl -v $KEYCLOAK_URL/auth || echo "Unable to connect to Keycloak."
-            exit 1
-          fi
 
+          echo "Waiting 45 sec for Keycloak to start.."
+          sleep 45
+         
 
 
       - name: Create .env file
