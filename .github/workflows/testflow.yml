@@ -35,15 +35,19 @@ jobs:
 
       - name: Wait for Keycloak
         run: |
+          echo "Extracting hostname and port from KEYCLOAK_URL"
           if [ -z "${{ secrets.KEYCLOAK_URL }}" ]; then
             KEYCLOAK_URL="http://localhost:8080"
           else
             KEYCLOAK_URL="${{ secrets.KEYCLOAK_URL }}"
           fi
-          echo "Waiting for Keycloak at $KEYCLOAK_URL"
+          
+          HOST=$(echo $KEYCLOAK_URL | awk -F[/:] '{print $4}')
+          PORT=$(echo $KEYCLOAK_URL | awk -F[/:] '{print $5}')
+          PORT=${PORT:-80} # Default to port 80 if not specified
+          echo "Waiting for Keycloak at $HOST:$PORT"
           for i in {1..30}; do
-            STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" $KEYCLOAK_URL)
-            if [ $STATUS_CODE -eq 200 ]; then
+            if nc -z $HOST $PORT; then
               echo "Keycloak is up!"
               break
             fi
