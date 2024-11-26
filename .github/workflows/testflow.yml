@@ -1,12 +1,10 @@
 name: Integration tests with KeyCloak
 
 on:
-  push:
-    branches:
-      - registreren
   pull_request:
     branches:
-      - registreren
+      - main
+      - dev
 
 jobs:
   test:
@@ -21,7 +19,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Start Keycloak
+      - name: Start Keycloak & import settings
         run: |
           docker run -d \
             -p 8080:8080 \
@@ -33,7 +31,7 @@ jobs:
             start-dev --http-host=0.0.0.0 --import-realm
 
 
-      - name: Wait for Keycloak
+      - name: Wait for Keycloak to start
         run: |
           echo "Extracting hostname and port from KEYCLOAK_URL"
           if [ -z "${{ secrets.KEYCLOAK_URL }}" ]; then
@@ -59,9 +57,7 @@ jobs:
           echo "Waiting 45 sec for Keycloak to start.."
           sleep 45
          
-
-
-      - name: Create .env file
+      - name: Create .env file in Java
         run: |
           echo "Creating .env file with secrets"
           cat <<EOF > .env
