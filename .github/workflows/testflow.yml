@@ -1,4 +1,4 @@
-name: Performance, Scalability & Testing
+name: Integration tests with KeyCloak
 
 on:
   push:
@@ -25,12 +25,12 @@ jobs:
         run: |
           docker run -d \
             -p 8080:8080 \
-            -e KEYCLOAK_USER=${{ secrets.KEYCLOAK_ADMIN }} \
-            -e KEYCLOAK_PASSWORD=${{ secrets.KEYCLOAK_PASSWORD }} \
-            -e KEYCLOAK_IMPORT=/tmp/realm-export.json \
-            -v ${{ github.workspace }}/keycloak-export/Babymonitor-realm.json:/tmp/realm-export.json \
+            -e KEYCLOAK_ADMIN=${{ secrets.KEYCLOAK_ADMIN }} \
+            -e KEYCLOAK_ADMIN_PASSWORD=${{ secrets.KEYCLOAK_PASSWORD }} \
+            -v ${{ github.workspace }}/keycloak-export/Babymonitor-realm.json:/opt/keycloak/data/import/realm-export.json \
             --name keycloak \
-            jboss/keycloak:15.0.2
+            quay.io/keycloak/keycloak:17.0.1 \
+            start-dev --import-realm
 
       - name: Wait for Keycloak
         run: |
