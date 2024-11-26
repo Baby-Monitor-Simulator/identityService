@@ -76,7 +76,7 @@ public class AuthController {
             return ResponseEntity.ok("Bearer " + jwtToken);
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Exception occurred");
         }
     }
 
