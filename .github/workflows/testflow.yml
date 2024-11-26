@@ -35,6 +35,8 @@ jobs:
       - name: Wait for Keycloak
         run: |
           echo "Extracting hostname and port from KEYCLOAK_URL"
+          KEYCLOAK_URL=${{ secrets.KEYCLOAK_URL:-"http://localhost:8080" }}
+          echo "Using KEYCLOAK_URL: $KEYCLOAK_URL"
           HOST=$(echo $KEYCLOAK_URL | awk -F[/:] '{print $4}')
           PORT=$(echo $KEYCLOAK_URL | awk -F[/:] '{print $5}')
           PORT=${PORT:-80} # Default to port 80 if not specified
