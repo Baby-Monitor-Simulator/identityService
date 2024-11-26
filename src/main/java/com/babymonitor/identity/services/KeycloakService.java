@@ -1,5 +1,7 @@
 package com.babymonitor.identity.services;
 
+import com.babymonitor.identity.models.LoginRequest;
+import com.babymonitor.identity.models.RoleAssigning;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.http.HttpResponse;
@@ -36,7 +38,7 @@ public class KeycloakService {
 
     private Keycloak keycloak;
 
-    public String assignRoleToUser(String username, String roleName, HttpServletRequest request) {
+    public String assignRoleToUser(RoleAssigning roleAssigning, HttpServletRequest request) {
         try {
             String token = extractBearerToken(request);
 
@@ -52,15 +54,14 @@ public class KeycloakService {
             );
 
             UsersResource usersResource = keycloak.realm(realm).users();
-            UserRepresentation user = usersResource.search(username).stream()
-                    .findFirst()
-                    .orElseThrow(() -> new NotFoundException("Gebruiker niet gevonden"));
+            UserRepresentation user = usersResource.get(roleAssigning.getUserID().toString()).toRepresentation()
+                    ;
 
-            RoleRepresentation role = keycloak.realm(realm).roles().get(roleName).toRepresentation();
+            RoleRepresentation role = keycloak.realm(realm).roles().get(roleAssigning.getRoleName()).toRepresentation();
 
             keycloak.realm(realm).users().get(user.getId()).roles().realmLevel().add(Collections.singletonList(role));
 
-            return "Rol " + roleName + " succesvol toegewezen aan gebruiker " + username;
+            return "Rol " + roleAssigning.getRoleName() + " succesvol toegewezen aan gebruiker " + roleAssigning.getUserID().toString();
         } catch (Exception e) {
             e.printStackTrace();
             return "Fout bij het toewijzen van de rol: " + e.getMessage();
@@ -76,7 +77,7 @@ public class KeycloakService {
     }
 
     // Verifieer de gebruikersnaam en het wachtwoord
-    public String authenticateWithKeycloak(String username, String password) {
+    public String authenticateWithKeycloak(LoginRequest loginRequest) {
         // Bouw de URL voor het token endpoint
         String tokenEndpoint = KeycloakUriBuilder.fromUri(authServerUrl)
                 .path("/realms/" + realm + "/protocol/openid-connect/token")
@@ -88,8 +89,8 @@ public class KeycloakService {
             // Stel de body in voor de password grant
             String body = "grant_type=" + OAuth2Constants.PASSWORD +
                     "&client_id=" + clientId +
-                    "&username=" + username +
-                    "&password=" + password;
+                    "&username=" + loginRequest.getEmail() +
+                    "&password=" + loginRequest.getPassword();
 
             // Verstuur de POST-verzoek
             try (CloseableHttpClient client = HttpClients.createDefault()) {

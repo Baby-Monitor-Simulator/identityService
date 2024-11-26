@@ -65,18 +65,18 @@ public class AuthController {
     public ResponseEntity<String> loginUser(@RequestBody LoginRequest loginRequest) {
         try {
             // Verifieer de gebruikersgegevens via Keycloak
-            String jwtToken = keycloakService.authenticateWithKeycloak(loginRequest.getUsername(), loginRequest.getPassword());
+            String jwtToken = keycloakService.authenticateWithKeycloak(loginRequest);
 
             // Als er geen token is, is de authenticatie mislukt
             if (jwtToken == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
             }
 
             // Retourneer het JWT-token
             return ResponseEntity.ok("Bearer " + jwtToken);
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
         }
     }
 
