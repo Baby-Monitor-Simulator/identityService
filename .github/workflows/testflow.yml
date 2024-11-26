@@ -29,8 +29,9 @@ jobs:
             -e KEYCLOAK_ADMIN_PASSWORD=${{ secrets.KEYCLOAK_PASSWORD }} \
             -v ${{ github.workspace }}/keycloak-export/Babymonitor-realm.json:/opt/keycloak/data/import/realm-export.json \
             --name keycloak \
-            quay.io/keycloak/keycloak:17.0.1 \
-            start-dev --import-realm
+            quay.io/keycloak/keycloak:23.0.6 \
+            start-dev --http-host=0.0.0.0 --import-realm
+
 
       - name: Wait for Keycloak
         run: |
@@ -44,16 +45,37 @@ jobs:
           HOST=$(echo $KEYCLOAK_URL | awk -F[/:] '{print $4}')
           PORT=$(echo $KEYCLOAK_URL | awk -F[/:] '{print $5}')
           PORT=${PORT:-80} # Default to port 80 if not specified
-
+      
+          echo "Checking if hostname and port are valid..."
+          if [ -z "$HOST" ]; then
+            echo "Error: Host is empty. Please check the KEYCLOAK_URL."
+            exit 1
+          fi
+          if ! [[ $PORT =~ ^[0-9]+$ ]]; then
+            echo "Error: Port is invalid: $PORT. Please check the KEYCLOAK_URL."
+            exit 1
+          fi
+      
           echo "Waiting for Keycloak at $HOST:$PORT"
+          sleep 100
           for i in {1..30}; do
             if nc -z $HOST $PORT; then
               echo "Keycloak is up!"
               break
             fi
-            echo "Waiting for Keycloak..."
+      
+            echo "Attempt $i: Keycloak is not yet available at $HOST:$PORT. Retrying in 5 seconds..."
             sleep 5
           done
+      
+          if ! nc -z $HOST $PORT; then
+            echo "Error: Keycloak did not start within the expected time."
+            echo "Checking network connectivity to $HOST:$PORT..."
+            ping -c 3 $HOST || echo "Error: Unable to reach $HOST."
+            exit 1
+          fi
+
+
 
       - name: Create .env file
         run: |
