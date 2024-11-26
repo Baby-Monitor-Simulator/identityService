@@ -30,30 +30,27 @@ jobs:
             -v ${{ github.workspace }}/keycloak-export/Babymonitor-realm.json:/opt/keycloak/data/import/realm-export.json \
             --name keycloak \
             quay.io/keycloak/keycloak:17.0.1 \
-            start-dev --import-realm
+            start-dev --http-host=0.0.0.0 --import-realm
+
 
       - name: Wait for Keycloak
         run: |
-          echo "Extracting hostname and port from KEYCLOAK_URL"
           if [ -z "${{ secrets.KEYCLOAK_URL }}" ]; then
             KEYCLOAK_URL="http://localhost:8080"
           else
             KEYCLOAK_URL="${{ secrets.KEYCLOAK_URL }}"
           fi
-          
-          HOST=$(echo $KEYCLOAK_URL | awk -F[/:] '{print $4}')
-          PORT=$(echo $KEYCLOAK_URL | awk -F[/:] '{print $5}')
-          PORT=${PORT:-80} # Default to port 80 if not specified
-
-          echo "Waiting for Keycloak at $HOST:$PORT"
+          echo "Waiting for Keycloak at $KEYCLOAK_URL"
           for i in {1..30}; do
-            if nc -z $HOST $PORT; then
+            STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" $KEYCLOAK_URL)
+            if [ $STATUS_CODE -eq 200 ]; then
               echo "Keycloak is up!"
               break
             fi
             echo "Waiting for Keycloak..."
             sleep 5
           done
+
 
       - name: Create .env file
         run: |
