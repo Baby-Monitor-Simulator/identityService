@@ -65,7 +65,9 @@ public class AuthController {
     public ResponseEntity<String> loginUser(@RequestBody LoginRequest loginRequest) {
         try {
             // Verifieer de gebruikersgegevens via Keycloak
+            System.out.println("Succesfully arrived in loginUser");
             String jwtToken = keycloakService.authenticateWithKeycloak(loginRequest.getUsername(), loginRequest.getPassword());
+            System.out.println("JWT Token made");
 
             // Als er geen token is, is de authenticatie mislukt
             if (jwtToken == null) {
