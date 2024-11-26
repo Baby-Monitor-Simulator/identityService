@@ -1,0 +1,80 @@
+name: Integration tests with KeyCloak
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Start Keycloak & import settings
+        run: |
+          docker run -d \
+            -p 8080:8080 \
+            -e KEYCLOAK_ADMIN=${{ secrets.KEYCLOAK_ADMIN }} \
+            -e KEYCLOAK_ADMIN_PASSWORD=${{ secrets.KEYCLOAK_PASSWORD }} \
+            -v ${{ github.workspace }}/keycloak-export/Babymonitor-realm.json:/opt/keycloak/data/import/realm-export.json \
+            --name keycloak \
+            quay.io/keycloak/keycloak:23.0.6 \
+            start-dev --http-host=0.0.0.0 --import-realm
+
+
+      - name: Wait for Keycloak to start
+        run: |
+          echo "Extracting hostname and port from KEYCLOAK_URL"
+          if [ -z "${{ secrets.KEYCLOAK_URL }}" ]; then
+            KEYCLOAK_URL="http://localhost:8080"
+          else
+            KEYCLOAK_URL="${{ secrets.KEYCLOAK_URL }}"
+          fi
+          
+          HOST=$(echo $KEYCLOAK_URL | awk -F[/:] '{print $4}')
+          PORT=$(echo $KEYCLOAK_URL | awk -F[/:] '{print $5}')
+          PORT=${PORT:-80} # Default to port 80 if not specified
+      
+          echo "Checking if hostname and port are valid..."
+          if [ -z "$HOST" ]; then
+            echo "Error: Host is empty. Please check the KEYCLOAK_URL."
+            exit 1
+          fi
+          if ! [[ $PORT =~ ^[0-9]+$ ]]; then
+            echo "Error: Port is invalid: $PORT. Please check the KEYCLOAK_URL."
+            exit 1
+          fi
+
+          echo "Waiting 45 sec for Keycloak to start.."
+          sleep 45
+         
+      - name: Create .env file in Java
+        run: |
+          echo "Creating .env file with secrets"
+          cat <<EOF > .env
+          KEYCLOAK_ADMIN=${{ secrets.KEYCLOAK_ADMIN }}
+          KEYCLOAK_ADMIN_PASSWORD=${{ secrets.KEYCLOAK_PASSWORD }}
+          KEYCLOAK_AUTH_SERVER_URL=${{ secrets.KEYCLOAK_URL }}
+          KEYCLOAK_CLIENT_ID=${{ secrets.KEYCLOAK_ID }}
+          KEYCLOAK_REALM=${{ secrets.KEYCLOAK_REALM }}
+          KEYCLOAK_USER_ADMIN=${{ secrets.KEYCLOAK_USER_ADMIN }}
+          KEYCLOAK_USER_PASSWORD=${{ secrets.KEYCLOAK_USER_PASSWORD }}
+          jwt.secret=${{ secrets.JWT_SECRET }}
+          jwt.expiration=${{ secrets.JWT_EXPIRATION }}
+          EOF
+
+      - name: Run Tests
+        run: mvn test
+
+      - name: Stop Keycloak
+        if: always()
+        run: docker stop keycloak
