@@ -1,8 +1,5 @@
 package com.babymonitor.identity.integrationtest;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.babymonitor.identity.models.LoginRequest;
 import com.babymonitor.identity.models.UserDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,11 +12,13 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import javax.ws.rs.core.MediaType;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestPropertySource(locations = "file:./.env")
-public class LoginIntegrationTest {
-
+public class RegisterIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -28,29 +27,33 @@ public class LoginIntegrationTest {
     private ObjectMapper objectMapper;
 
 
-    // Perform a successful login
+    // Perform a successful registration
     @Test
-    public void loginTestSuccess() throws Exception {
-        LoginRequest loginRequest = new LoginRequest("zakaria@example.com", "hassan");
+    public void registrationTestSuccess() throws Exception {
+        UserDTO user = new UserDTO();
+        user.setEmail("example@email.com");
+        user.setPassword("password");
 
-        String jsonBody = objectMapper.writeValueAsString(loginRequest);
+        String jsonBody = objectMapper.writeValueAsString(user);
 
-        mockMvc.perform(post("/identity/login")
+        mockMvc.perform(post("/identity/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody))
                 .andExpect(status().isOk());
     }
 
-    // Perform a failing login, expect an unauthorized status
+
+    // Perform a failing registration
     @Test
-    public void loginTestUnauthorized() throws Exception {
-        LoginRequest loginRequest = new LoginRequest("unregisteredUser@example.com", "unregisteredUser");
+    public void registrationTestFailMissingEmail() throws Exception {
+        UserDTO user = new UserDTO();
+        user.setPassword("password");
 
-        String jsonBody = objectMapper.writeValueAsString(loginRequest);
+        String jsonBody = objectMapper.writeValueAsString(user);
 
-        mockMvc.perform(post("/identity/login")
+        mockMvc.perform(post("/identity/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isInternalServerError());
     }
 }
