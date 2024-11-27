@@ -44,13 +44,12 @@ public class UserCreation {
                 .build();
     }
 
-    public String createUser(String username, String email, String password) {
+    public String createUser(String email, String password) {
             Keycloak keycloak = getKeycloakClient();
             RealmResource realmResource = keycloak.realm(realm);
             UsersResource usersResource = realmResource.users();
 
             UserRepresentation user = new UserRepresentation();
-            user.setUsername(username);
             user.setEmail(email);
             user.setEnabled(true);
 

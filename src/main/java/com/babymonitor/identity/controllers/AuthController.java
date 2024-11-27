@@ -53,7 +53,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody UserDTO userDTO) {
-        String userId = userCreation.createUser(userDTO.getUsername(), userDTO.getEmail(), userDTO.getPassword());
+        String userId = userCreation.createUser(userDTO.getEmail(), userDTO.getPassword());
         if (userId != null) {
             return ResponseEntity.ok("User created with ID: " + userId);
         } else {
