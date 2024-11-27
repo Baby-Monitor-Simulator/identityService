@@ -27,7 +27,7 @@
   "oauth2DevicePollingInterval" : 5,
   "enabled" : true,
   "sslRequired" : "external",
-  "registrationAllowed" : false,
+  "registrationAllowed" : true,
   "registrationEmailAsUsername" : true,
   "rememberMe" : false,
   "verifyEmail" : false,
@@ -459,8 +459,29 @@
     "requiredActions" : [ ],
     "realmRoles" : [ "default-roles-babymonitor", "admin", "instructeur", "deelnemer" ],
     "clientRoles" : {
+      "realm-management" : [ "manage-users" ],
       "babymonitor-client-api" : [ "client_admin" ]
     },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "aeea281c-6475-47a6-b0dd-fbf3d44033ca",
+    "createdTimestamp" : 1732704388190,
+    "username" : "newwwww@example.com",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "email" : "newwwww@example.com",
+    "credentials" : [ {
+      "id" : "b5e5a617-0f1a-45cd-b330-485c09d528e0",
+      "type" : "password",
+      "createdDate" : 1732704388231,
+      "secretData" : "{\"value\":\"DMvZ0PdyZYA6N4/8ZqVZm1A+mESaEcJ4c7/Das5orFA=\",\"salt\":\"TU+GilRIQg4CMLuecbBwDQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-babymonitor" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
