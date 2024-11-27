@@ -55,7 +55,7 @@ jobs:
           fi
 
           echo "Waiting 45 sec for Keycloak to start.."
-          sleep 90
+          sleep 45
          
       - name: Create .env file in Java
         run: |
