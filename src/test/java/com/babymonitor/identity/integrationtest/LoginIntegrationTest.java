@@ -29,7 +29,7 @@ public class LoginIntegrationTest {
 
     @Test
     public void logintestSucces() throws Exception {
-        LoginRequest loginRequest = new LoginRequest("adminbm", "myadminpassword");
+        LoginRequest loginRequest = new LoginRequest("adminbm@example.com", "myadminpassword");
 
         String jsonBody = objectMapper.writeValueAsString(loginRequest);
 
