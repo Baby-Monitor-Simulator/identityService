@@ -26,7 +26,7 @@ In de map keycloak-export is een bestand te vinden. Dit is de keycloak configura
 
 #### Checken of Import map te vinden is in keycloak container
 
-1. Run in terminal: ```docker exec -it identityservice-keycloak-1 /bin/bash``` --> Dit zorgt ervoor dat u in de directory komt van uw keycloak container in Docker.
+1. Run in terminal: ```docker exec -it identity-keycloak-1 /bin/bash``` --> Dit zorgt ervoor dat u in de directory komt van uw keycloak container in Docker.
 2. Run in terminal: ```cd /opt/keycloak/data/``` 
 3. Run in terminal: ```ls```
 
@@ -40,7 +40,7 @@ In de map keycloak-export is een bestand te vinden. Dit is de keycloak configura
 > Check de naam van uw Keycloak container in Docker.
 
 5. Run in terminal: ```docker cp ./keycloak-export/Babymonitor-realm.json identityservice-keycloak-1:/opt/keycloak/data/import/Babymonitor-realm.json```
-6. Run in terminal: ```docker exec -it identityservice-keycloak-1 /opt/keycloak/bin/kc.sh import --dir=/opt/keycloak/data/import```
+6. Run in terminal: ```docker exec -it identity-keycloak-1 /opt/keycloak/bin/kc.sh import --dir=/opt/keycloak/data/import```
 
 > [!NOTE]  
 > Dat was m!
