@@ -26,71 +26,53 @@ import org.keycloak.OAuth2Constants;
 @Service
 public class KeycloakService {
 
-    @Value("${KEYCLOAK_AUTH_SERVER_URL}")
-    private String authServerUrl;
+    private final KeycloakProperties keycloakProperties;
+    private final JwtTokenUtil jwtTokenUtil;
 
-    @Value("${KEYCLOAK_REALM}")
-    private String realm;
-
-    @Value("${KEYCLOAK_CLIENT_ID}")
-    private String clientId;
-
-
-    private Keycloak keycloak;
+    public KeycloakService(KeycloakProperties keycloakProperties, JwtTokenUtil jwtTokenUtil) {
+        this.keycloakProperties = keycloakProperties;
+        this.jwtTokenUtil = jwtTokenUtil;
+    }
 
     public String assignRoleToUser(RoleAssigning roleAssigning, HttpServletRequest request) {
         try {
-            String token = extractBearerToken(request);
-
+            String token = jwtTokenUtil.extractBearerToken(request);
             if (token == null) {
                 throw new RuntimeException("JWT token ontbreekt in de Authorization header");
             }
 
-            this.keycloak = Keycloak.getInstance(
-                    authServerUrl,
-                    realm,
-                    clientId,
+            Keycloak keycloak = Keycloak.getInstance(
+                    keycloakProperties.getAuthServerUrl(),
+                    keycloakProperties.getRealm(),
+                    keycloakProperties.getClientId(),
                     token
             );
 
-            UsersResource usersResource = keycloak.realm(realm).users();
-            UserRepresentation user = usersResource.get(roleAssigning.getUserID().toString()).toRepresentation()
-                    ;
+            UsersResource usersResource = keycloak.realm(keycloakProperties.getRealm()).users();
+            UserRepresentation user = usersResource.get(roleAssigning.getUserID().toString()).toRepresentation();
+            RoleRepresentation role = keycloak.realm(keycloakProperties.getRealm()).roles()
+                    .get(roleAssigning.getRoleName()).toRepresentation();
 
-            RoleRepresentation role = keycloak.realm(realm).roles().get(roleAssigning.getRoleName()).toRepresentation();
+            usersResource.get(user.getId()).roles().realmLevel().add(Collections.singletonList(role));
 
-            keycloak.realm(realm).users().get(user.getId()).roles().realmLevel().add(Collections.singletonList(role));
-
-            return "Rol " + roleAssigning.getRoleName() + " succesvol toegewezen aan gebruiker " + roleAssigning.getUserID().toString();
+            return "Rol " + roleAssigning.getRoleName() + " succesvol toegewezen aan gebruiker " + roleAssigning.getUserID();
         } catch (Exception e) {
             e.printStackTrace();
             return "Fout bij het toewijzen van de rol: " + e.getMessage();
         }
     }
 
-    private String extractBearerToken(HttpServletRequest request) {
-        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            return authorizationHeader.substring(7);
-        }
-        return null;
-    }
-
-    // Verifieer de gebruikersnaam en het wachtwoord
-    public String authenticateWithKeycloak(LoginRequest loginRequest) {
-        // Bouw de URL voor het token endpoint
-        String tokenEndpoint = KeycloakUriBuilder.fromUri(authServerUrl)
-                .path("/realms/" + realm + "/protocol/openid-connect/token")
-                .build()
-                .toString();
-
-        // Maak een POST-verzoek naar Keycloak om de gebruiker te verifiëren
+    public String authenticateWithKeycloak(String username, String password) {
         try {
+            // Bouw de URL voor het token endpoint
+            String tokenEndpoint = keycloakProperties.getAuthServerUrl() +
+                    "/realms/" + keycloakProperties.getRealm() + "/protocol/openid-connect/token";
+
             // Stel de body in voor de password grant
             String body = "grant_type=" + OAuth2Constants.PASSWORD +
-                    "&client_id=" + clientId +
-                    "&username=" + loginRequest.getEmail() +
-                    "&password=" + loginRequest.getPassword();
+                    "&client_id=" + keycloakProperties.getClientId() +
+                    "&username=" + username +
+                    "&password=" + password;
 
             // Verstuur de POST-verzoek
             try (CloseableHttpClient client = HttpClients.createDefault()) {
@@ -103,17 +85,19 @@ public class KeycloakService {
                 // Controleer de statuscode van de response
                 if (response.getStatusLine().getStatusCode() == 200) {
                     ObjectMapper objectMapper = new ObjectMapper();
-                    AccessTokenResponse tokenResponse = objectMapper.readValue(response.getEntity().getContent(), AccessTokenResponse.class);
+                    AccessTokenResponse tokenResponse = objectMapper.readValue(
+                            response.getEntity().getContent(), AccessTokenResponse.class);
 
-                    // Als het verzoek succesvol is, retourneer dan het JWT-token
-                    return tokenResponse.getToken();  // Het token is nu geldig voor deze gebruiker
+                    // Retourneer het JWT-token
+                    return tokenResponse.getToken();
                 } else {
-                    return null;  // Fout bij inloggen
+                    throw new RuntimeException("Keycloak authentication failed: " +
+                            response.getStatusLine().getStatusCode());
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return null;  // Fout bij de aanvraag
+            throw new RuntimeException("Error during authentication with Keycloak", e);
         }
     }
 }

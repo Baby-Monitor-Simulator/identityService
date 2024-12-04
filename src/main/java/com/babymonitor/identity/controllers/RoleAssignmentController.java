@@ -23,8 +23,6 @@ public class RoleAssignmentController {
         this.keycloakService = keycloakService;
     }
 
-
-
     @PostMapping("/role")
     @PreAuthorize("hasRole('admin')")
     public ResponseEntity<String> assignRole(
