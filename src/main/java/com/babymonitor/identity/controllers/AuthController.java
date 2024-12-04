@@ -50,8 +50,11 @@ public class AuthController {
             }
 
             return ResponseEntity.ok("Bearer " + jwtToken);
+        } catch (RuntimeException e) {
+            // Specifieke runtime-excepties loggen of afhandelen
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Exception occurred while logging in");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error occurred");
         }
     }
 }
