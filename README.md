@@ -4,7 +4,7 @@
 > Informatie na het pullen van deze repository.
 
 > [!WARNING]  
-> Allereerst project clonen naar lokale omgeving.
+> Allereerst project pullen naar lokale omgeving.
 
 
 ## KeyCloak runnen
