@@ -1,4 +1,15 @@
 services:
+#  identity:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile.dev
+#    volumes:
+#      - ./src:/identity/src           # Mount the local src directory
+#      - ./target:/identity/target       # Mount the local target directory
+#      - ./mvnw:/identity/mvnw           # Mount the mvnw script
+#      - ./pom.xml:/identity/pom.xml     # Mount the pom.xml if needed
+#    ports:
+#      - "8082:8082"                     # Map port 8082 to the host
   postgres:
     image: postgres:16.2
     volumes:
@@ -9,6 +20,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
       - keycloak_network
+    env_file:
+      - .env
 
   keycloak:
     image: quay.io/keycloak/keycloak:23.0.6
@@ -28,6 +41,8 @@ services:
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - 8080:8080
+    env_file:
+      - .env
     restart: always
     depends_on:
       - postgres
@@ -39,7 +54,6 @@ services:
 volumes:
   postgres_data: {}
   keycloak_data: {}
-
 
 networks:
   keycloak_network:
