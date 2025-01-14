@@ -11,6 +11,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 
 @RestController
 @RequestMapping("/users")
@@ -35,6 +37,18 @@ public class RoleAssignmentController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Fout bij het toewijzen van de rol, alleen Admins mogen rollen toewijzen: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/name/{userid}")
+    public ResponseEntity<String> getUserName(@PathVariable UUID userid) {
+        System.out.println("getting the name of the following userid"+ userid);
+        String name = keycloakService.getNameByUserId(userid);
+
+        if (name.isEmpty()) {
+            return ResponseEntity.badRequest().body("Fout bij het ophalen van de naam");
+        } else {
+            return ResponseEntity.ok(name);
         }
     }
 }

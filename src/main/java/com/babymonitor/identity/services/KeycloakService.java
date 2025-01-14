@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.HttpHeaders;
 import java.util.Collections;
+import java.util.UUID;
+
 import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.OAuth2Constants;
 
@@ -64,6 +66,7 @@ public class KeycloakService {
 
     public String authenticateWithKeycloak(String username, String password) {
         try {
+            System.out.println(username);
             // Bouw de URL voor het token endpoint
             String tokenEndpoint = keycloakProperties.getAuthServerUrl() +
                     "/realms/" + keycloakProperties.getRealm() + "/protocol/openid-connect/token";
@@ -100,4 +103,38 @@ public class KeycloakService {
             throw new RuntimeException("Error during authentication with Keycloak", e);
         }
     }
+
+    public String getNameByUserId(UUID userId) {
+        try {
+            // Authenticate using admin credentials to retrieve an admin token
+            String adminToken = authenticateWithKeycloak(
+                    System.getenv("KEYCLOAK_USER_ADMIN"),
+                    System.getenv("KEYCLOAK_USER_PASSWORD")
+            );
+
+            // Create a Keycloak instance with admin token
+            Keycloak keycloak = KeycloakBuilder.builder()
+                    .serverUrl(keycloakProperties.getAuthServerUrl())
+                    .realm(keycloakProperties.getRealm())
+                    .clientId(keycloakProperties.getClientId())
+                    .authorization(adminToken)
+                    .build();
+
+            // Access the UsersResource to retrieve the user information
+            UsersResource usersResource = keycloak.realm(keycloakProperties.getRealm()).users();
+
+            // Get the UserRepresentation object for the given user ID
+            UserRepresentation user = usersResource.get(userId.toString()).toRepresentation();
+
+            // Retrieve and return the email address
+            String email  = user.getEmail();
+            return email.split("@")[0];
+        } catch (NotFoundException e) {
+            throw new RuntimeException("User not found for ID: " + userId, e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error retrieving email for user ID: " + userId, e);
+        }
+    }
+
 }
