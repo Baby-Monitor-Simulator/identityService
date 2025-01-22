@@ -6,8 +6,21 @@
 > [!WARNING]  
 > Allereerst project pullen naar lokale omgeving.
 
+Hieronder staan 2 opties omschreven om Keycloak te configureren voor gebruik in het project. 
 
-## KeyCloak runnen
+## Optie 1 
+
+1. Open Keycloak op het internet. Dit zou localhost:8080 moeten zijn.
+2. Log in met de credentials die in het overdrachtsdocument staan van gebruiker "Myadmin".
+3. Na het succesvol inloggen navigeer je naar Realm Settings.
+4. Op deze pagina klik rechtsboven op Action en kies je Partial Import.
+5. Vervolgens ga je naar de Identityservice en kopieer je deze file: C:\identityService\keycloak\export\Babymonitor-realm.json
+6. Sleep, Upload of Plak deze file in het Partial Import Resource file stukje.
+7. Vervolgens klik je op Import.
+
+Nu heb je succesvol de Realm van Babymonitor met alle nodige gegevens geimporteerd. Gebruik deze Realm voor de vervolgstappen in het gehele project.
+
+## Optie 2
 
 1. Ga naar de juiste directory waarin het project opgeslagen staat.
 2. Run volgende commando: 
