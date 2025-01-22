@@ -12,9 +12,8 @@ Hieronder staan 2 opties omschreven om Keycloak te configureren voor gebruik in 
 
 1. Open Keycloak op het internet. Dit zou localhost:8080 moeten zijn.
 2. Log in met de credentials die in het overdrachtsdocument staan van gebruiker "Myadmin".
-3. Na het succesvol inloggen navigeer je naar Realm Settings.
-4. Op deze pagina klik rechtsboven op Action en kies je Partial Import.
-5. Vervolgens ga je naar de Identityservice en kopieer je deze file: C:\identityService\keycloak\export\Babymonitor-realm.json
+3. Na het succesvol inloggen klik je linksboven op master en kies "Create Realm".
+5. Vervolgens kies je in de Identityservice deze file: C:\identityService\keycloak\export\Babymonitor-realm.json
 6. Sleep, Upload of Plak deze file in het Partial Import Resource file stukje.
 7. Vervolgens klik je op Import.
 
