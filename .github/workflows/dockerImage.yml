@@ -1,0 +1,52 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - dockerHub
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      VERSION: "1"
+
+    steps:
+    # Check out the code
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # Set up Docker Buildx
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    # Set the tag based on the branch
+    - name: Set Docker tag
+      run: |
+        if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+          TAG="latest"
+        else
+          TAG="latest-dev"
+        fi
+        echo "TAG=${TAG}" >> $GITHUB_ENV  # Set the tag as an environment variable
+
+    # Build the Docker image
+    - name: Build Docker image
+      run: |
+        docker build . --file Dockerfile.dev --tag babymonitors/identityservice:$TAG --tag babymonitors/identityservice:${{ env.VERSION }}.${{ github.run_number }}
+
+    # Log in to Docker Hub using secrets
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # Push the Docker image to Docker Hub
+    - name: Push Docker image to Docker Hub
+      run: |
+        docker push babymonitors/identityservice:${{ env.VERSION }}.${{ github.run_number }}
+        docker push babymonitors/identityservice:$TAG
